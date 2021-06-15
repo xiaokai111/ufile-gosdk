@@ -455,7 +455,7 @@ func (u *UFileRequest) GetPrivateURL(keyName string, expiresDuation time.Duratio
 	return reqURL + "?" + query.Encode()
 }
 
-func (u *UFileRequest) DownloadByAgent(reqURL agent string) error {
+func (u *UFileRequest) DownloadByAgent(reqURL, agent string) error {
 	agenturl := "http://" + agent
 	agenturi, err := url.Parse(agenturl)
 	client := http.Client{
