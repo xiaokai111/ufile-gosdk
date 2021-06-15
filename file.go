@@ -210,6 +210,7 @@ func (u *UFileRequest) PutFileByAgent(filePath, keyName, mimeType, agent string)
 			// 设置代理
 			Proxy: http.ProxyURL(agenturi),
 		},
+		Timeout: time.Second * 5,
 	}
 	u.Client = &client
 	req, err := http.NewRequest("PUT", reqURL, bytes.NewBuffer(b))
@@ -463,6 +464,7 @@ func (u *UFileRequest) DownloadByAgent(reqURL, agent string) error {
 			// 设置代理
 			Proxy: http.ProxyURL(agenturi),
 		},
+		Timeout: time.Second * 5,
 	}
 	u.Client = &client
 
