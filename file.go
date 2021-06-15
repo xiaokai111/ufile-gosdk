@@ -378,6 +378,28 @@ func (u *UFileRequest) PutFileWithPolicy(filePath, keyName, mimeType string, pol
 	return u.request(req)
 }
 
+func (u *UFileRequest) DeleteFileByAgent(keyName, agent string) error {
+	agenturl := "http://" + agent
+	agenturi, err := url.Parse(agenturl)
+	client := http.Client{
+		Transport: &http.Transport{
+			// 设置代理
+			Proxy: http.ProxyURL(agenturi),
+		},
+		Timeout: time.Second * 5,
+	}
+	u.Client = &client
+	reqURL := u.genFileURL(keyName)
+	req, err := http.NewRequest("DELETE", reqURL, nil)
+	if err != nil {
+		return err
+	}
+	authorization := u.Auth.Authorization("DELETE", u.BucketName, keyName, req.Header)
+	req.Header.Add("authorization", authorization)
+	return u.request(req)
+
+}
+
 //DeleteFile 删除一个文件，如果删除成功 statuscode 会返回 204，否则会返回 404 表示文件不存在。
 //keyName 表示传到 ufile 的文件名。
 func (u *UFileRequest) DeleteFile(keyName string) error {
@@ -389,6 +411,29 @@ func (u *UFileRequest) DeleteFile(keyName string) error {
 	authorization := u.Auth.Authorization("DELETE", u.BucketName, keyName, req.Header)
 	req.Header.Add("authorization", authorization)
 	return u.request(req)
+}
+
+func (u *UFileRequest) HeadFileByAgent(keyName, agent string) error {
+	agenturl := "http://" + agent
+	agenturi, err := url.Parse(agenturl)
+	client := http.Client{
+		Transport: &http.Transport{
+			// 设置代理
+			Proxy: http.ProxyURL(agenturi),
+		},
+		Timeout: time.Second * 5,
+	}
+	u.Client = &client
+
+	reqURL := u.genFileURL(keyName)
+	req, err := http.NewRequest("HEAD", reqURL, nil)
+	if err != nil {
+		return err
+	}
+	authorization := u.Auth.Authorization("HEAD", u.BucketName, keyName, req.Header)
+	req.Header.Add("authorization", authorization)
+	return u.request(req)
+
 }
 
 //HeadFile 获取一个文件的基本信息，返回的信息全在 header 里面。包含 mimeType, content-length（文件大小）, etag, Last-Modified:。
