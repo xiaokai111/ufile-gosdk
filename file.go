@@ -211,7 +211,7 @@ func (u *UFileRequest) PutFileByAgent(filePath, keyName, mimeType, agent string)
 			Proxy: http.ProxyURL(agenturi),
 		},
 	}
-	u.Client = client
+	u.Client = &client
 	req, err := http.NewRequest("PUT", reqURL, bytes.NewBuffer(b))
 	if err != nil {
 		return err
