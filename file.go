@@ -455,6 +455,24 @@ func (u *UFileRequest) GetPrivateURL(keyName string, expiresDuation time.Duratio
 	return reqURL + "?" + query.Encode()
 }
 
+func (u *UFileRequest) DownloadByAgent(reqURL agent,string) error {
+	agenturl := "http://" + agent
+	agenturi, err := url.Parse(agenturl)
+	client := http.Client{
+		Transport: &http.Transport{
+			// 设置代理
+			Proxy: http.ProxyURL(agenturi),
+		},
+	}
+	u.Client = &client
+
+	req, err := http.NewRequest("GET", reqURL, nil)
+	if err != nil {
+		return err
+	}
+	return u.request(req)
+}
+
 //Download 把文件下载到 HTTP Body 里面，这里只能用来下载小文件，建议使用 DownloadFile 来下载大文件。
 func (u *UFileRequest) Download(reqURL string) error {
 	req, err := http.NewRequest("GET", reqURL, nil)
