@@ -204,6 +204,7 @@ func (u *UFileRequest) PutFileByAgentHttps(filePath, keyName, mimeType, agent st
 		return err
 	}
 
+	u.baseURL.Scheme = "https"
 	agenturl := "https://" + agent
 	agenturi, err := url.Parse(agenturl)
 	client := http.Client{
