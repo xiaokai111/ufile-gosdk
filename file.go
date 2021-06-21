@@ -190,6 +190,60 @@ func (u *UFileRequest) PostFile(filePath, keyName, mimeType string) (err error) 
 	}
 	return u.request(req)
 }
+
+func (u *UFileRequest) PutFileByAgentHttps(filePath, keyName, mimeType, agent string) error {
+	reqURL := u.genFileURL(keyName)
+	file, err := openFile(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	b, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	agenturl := "https://" + agent
+	agenturi, err := url.Parse(agenturl)
+	client := http.Client{
+		Transport: &http.Transport{
+			// 设置代理
+			Proxy: http.ProxyURL(agenturi),
+		},
+		Timeout: time.Second * 5,
+	}
+	u.Client = &client
+	req, err := http.NewRequest("PUT", reqURL, bytes.NewBuffer(b))
+	if err != nil {
+		return err
+	}
+
+	if mimeType == "" {
+		mimeType = getMimeType(file)
+	}
+	req.Header.Add("Content-Type", mimeType)
+	for k, v := range u.RequestHeader {
+		for i := 0; i < len(v); i++ {
+			req.Header.Add(k, v[i])
+		}
+	}
+
+	if u.verifyUploadMD5 {
+		md5Str := fmt.Sprintf("%x", md5.Sum(b))
+		req.Header.Add("Content-MD5", md5Str)
+	}
+
+	authorization := u.Auth.Authorization("PUT", u.BucketName, keyName, req.Header)
+	req.Header.Add("authorization", authorization)
+	fileSize := getFileSize(file)
+	req.Header.Add("Content-Length", strconv.FormatInt(fileSize, 10))
+	//req.Header.Set("User-Agent", "us3sre/v1.0.0")
+	//resp, err := client.Do(req.WithContext(u.Context))
+
+	return u.request(req)
+
+}
 func (u *UFileRequest) PutFileByAgent(filePath, keyName, mimeType, agent string) error {
 	reqURL := u.genFileURL(keyName)
 	file, err := openFile(filePath)
