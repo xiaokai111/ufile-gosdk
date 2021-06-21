@@ -3,6 +3,7 @@ package ufsdk
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -210,7 +211,8 @@ func (u *UFileRequest) PutFileByAgentHttps(filePath, keyName, mimeType, agent st
 	client := http.Client{
 		Transport: &http.Transport{
 			// 设置代理
-			Proxy: http.ProxyURL(agenturi),
+			Proxy:        http.ProxyURL(agenturi),
+			TLSNextProto: make(map[string]func(authority string, c *tls.Conn) http.RoundTripper),
 		},
 		Timeout: time.Second * 5,
 	}
